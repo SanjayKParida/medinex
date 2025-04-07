@@ -1,0 +1,43 @@
+# ============================
+# Root level
+# ============================
+.env
+.serverless/
+**/.env            # ignore all .env files anywhere
+**/.serverless/    # ignore all .serverless/ folders anywhere
+**/node_modules
+
+# ============================
+# Backend - Node.js
+# ============================
+medinix_backend/node_modules/
+medinix_backend/package-lock.json
+medinix_backend/.env
+medinix_backend/logs/
+medinix_backend/dist/
+medinix_backend/tmp/
+
+# ============================
+# Flutter - Frontend
+# ============================
+medinix_frontend/.dart_tool/
+medinix_frontend/.idea/
+medinix_frontend/.vscode/
+medinix_frontend/.packages
+medinix_frontend/build/
+medinix_frontend/.flutter-plugins
+medinix_frontend/.flutter-plugins-dependencies
+medinix_frontend/ios/Flutter/Generated.xcconfig
+medinix_frontend/ios/Pods/
+medinix_frontend/macos/Flutter/ephemeral/
+medinix_frontend/pubspec.lock
+medinix_frontend/medinix_frontend.iml
+medinix_frontend/.env
+
+# ============================
+# OS & Editor Files
+# ============================
+.DS_Store
+Thumbs.db
+*.swp
+*.iml

@@ -1,0 +1,18 @@
+getOtp:
+  handler: lambdas/index.sendOTP
+verifyOtp:
+  handler: lambdas/index.verifyOTP
+registerPatient:
+  handler: lambdas/index.addPatient
+registerDoctor:
+  handler: lambdas/index.addDoctor
+loginPatient:
+  handler: lambdas/index.patientLogin
+loginDoctor:
+  handler: lambdas/index.doctorLogin
+setDoctorPassword:
+  handler: lambdas/index.createDoctorPassword
+getDoctorDetailsByLoginId:
+  handler: lambdas/index.getDoctorDetails
+getPatientDetialsByNumber:
+  handler: lambdas/index.getPatientDetails

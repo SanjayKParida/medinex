@@ -1,0 +1,14 @@
+
+org: prtcl
+app: medinex
+service: medinex-backend
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ap-south-1
+  stage: dev
+
+functions: ${file(./lambdas/handlers.yml)}
+  
+
