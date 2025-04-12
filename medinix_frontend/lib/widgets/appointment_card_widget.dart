@@ -90,7 +90,7 @@ class AppointmentCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+        margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
           gradient: LinearGradient(
@@ -166,35 +166,36 @@ class AppointmentCard extends StatelessWidget {
                       ),
 
                       // Status chip
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _getStatusIcon(),
-                              color: _getStatusColor(),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              appointment.status,
-                              style: TextStyle(
+                      if (appointment.status != "confirmed")
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _getStatusIcon(),
                                 color: _getStatusColor(),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                                size: 16,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                appointment.status,
+                                style: TextStyle(
+                                  color: _getStatusColor(),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                     ],
                   ),
 

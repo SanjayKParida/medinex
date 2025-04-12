@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         setState(() {
           isAppointmentLoading = false;
-          ApprovedDoctors().verifiedDoctorsListLoaded = true;
+          PatientAppointments().patientAppointmentsLoaded = true;
         });
       }
     } catch (e) {
@@ -149,9 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                // Navigate to see all doctors
-              },
+              onPressed: () {},
               child: Text(
                 "See all",
                 style: GoogleFonts.poppins(
