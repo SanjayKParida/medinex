@@ -14,8 +14,6 @@ class AppointmentCard extends StatelessWidget {
     switch (appointment.status.toLowerCase()) {
       case 'confirmed':
         return Icons.check_circle;
-      case 'pending':
-        return Icons.pending;
       case 'cancelled':
         return Icons.cancel;
       case 'completed':
@@ -29,8 +27,6 @@ class AppointmentCard extends StatelessWidget {
     switch (appointment.status.toLowerCase()) {
       case 'confirmed':
         return Colors.green;
-      case 'pending':
-        return Colors.orange;
       case 'cancelled':
         return Colors.red;
       case 'completed':
@@ -166,36 +162,41 @@ class AppointmentCard extends StatelessWidget {
                       ),
 
                       // Status chip
-                      if (appointment.status != "confirmed")
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _getStatusIcon(),
-                                color: _getStatusColor(),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                appointment.status,
-                                style: TextStyle(
+                      appointment.status != "confirmed"
+                          ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _getStatusIcon(),
                                   color: _getStatusColor(),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                                  size: 16,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  appointment.status,
+                                  style: TextStyle(
+                                    color: _getStatusColor(),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          : _buildActionButton(
+                            icon: PhosphorIcons.xCircle(),
+                            label: "Cancel",
+                            onTap: () {},
                           ),
-                        ),
                     ],
                   ),
 
@@ -257,7 +258,7 @@ class AppointmentCard extends StatelessWidget {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 9),
                                   Text(
                                     appointment.reason,
                                     style: const TextStyle(
@@ -278,16 +279,6 @@ class AppointmentCard extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 12),
-
-                  // Action buttons
-                  const SizedBox(width: 8),
-                  _buildActionButton(
-                    icon: Icons.cancel_outlined,
-                    label: 'Cancel',
-                    onTap: () {
-                      // Add cancel functionality
-                    },
-                  ),
                 ],
               ),
             ),

@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.3,
+          height: MediaQuery.sizeOf(context).height * 0.225,
           width: MediaQuery.sizeOf(context).width,
           child:
               isAppointmentLoading
