@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/routes.dart';
-import 'package:medinix_frontend/repositories/login_repo.dart';
+import 'package:medinix_frontend/repositories/doctor_repository.dart';
+import 'package:medinix_frontend/repositories/patient_repository.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -14,23 +17,23 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      _syncAndNavigate();
-    });
+
+    Future.delayed(Duration(milliseconds: 400), () => _syncAndNavigate());
   }
 
   Future<void> _syncAndNavigate() async {
+    print("called");
     final prefs = SharedPreferencesService.getInstance();
     await prefs.init();
 
     final userType = prefs.userType;
 
     if (userType == "doctor") {
-      final doctorLoginId = prefs.getUserDetails()?["doctorLoginId"];
+      final doctorLoginId = prefs.getUserDetails()?["doctorId"];
       print("doctorLogin id : $doctorLoginId");
 
       if (doctorLoginId != null) {
-        final result = await LoginRepo().getDoctorDetails(doctorLoginId);
+        final result = await DoctorRepo().getDoctorDetails(doctorLoginId);
 
         print("Doctor details API response: $result");
 
@@ -62,10 +65,11 @@ class _SplashScreenState extends State<SplashScreen> {
       // If login failed or doctor not found
       Navigator.pushReplacementNamed(context, Routes.loginScreen);
     } else if (userType == "patient") {
-      final phoneNumber = prefs.getUserDetails()?["mobileNumber"];
+      final phoneNumber = prefs.getUserDetails()?["phoneNumber"];
 
       if (phoneNumber != null) {
-        final result = await LoginRepo().getPatientDetails(phoneNumber);
+        final result = await PatientRepo().getPatientDetails(phoneNumber);
+        print("result:::: $result");
 
         final statusCode = result['statusCode'];
         final body = result['body'];
@@ -92,17 +96,17 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Text(
               'Medinix',
-              style: TextStyle(
-                fontSize: 28,
+              style: GoogleFonts.poppins(
+                fontSize: 38,
                 fontWeight: FontWeight.bold,
                 color: Colors.teal,
               ),
             ),
-            SizedBox(height: 12),
-            CircularProgressIndicator(color: Colors.teal),
+            SizedBox(height: 20),
+            CupertinoActivityIndicator(color: Colors.teal, radius: 15),
           ],
         ),
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:medinix_frontend/constants/routes.dart';
-import 'package:medinix_frontend/repositories/login_repo.dart';
+import 'package:medinix_frontend/repositories/auth_repo.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DoctorDetailScreen extends StatefulWidget {
@@ -113,7 +113,7 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> {
 
         print("Doctor data : $doctorData");
 
-        await LoginRepo().handleRegisterDoctor(
+        await AuthRepo().handleRegisterDoctor(
           doctorData,
         ); // ✅ Main integration point
 

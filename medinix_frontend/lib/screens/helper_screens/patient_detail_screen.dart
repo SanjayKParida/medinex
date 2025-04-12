@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:medinix_frontend/constants/routes.dart';
-import 'package:medinix_frontend/repositories/login_repo.dart';
+import 'package:medinix_frontend/repositories/auth_repo.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class PatientDetailScreen extends StatefulWidget {
@@ -118,9 +118,9 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
 
         print("Patient data : $patientData");
 
-        await LoginRepo().handleRegisterPatient(
+        await AuthRepo().handleRegisterPatient(
           patientData,
-        ); // ✅ Main integration point
+        ); 
 
         Navigator.pushNamedAndRemoveUntil(
           context,

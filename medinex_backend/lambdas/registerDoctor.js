@@ -1,31 +1,27 @@
 import { getMongoClient } from "../db/db.js";
-import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs";
 
 let mongoClient;
 
-// Function to generate a random doctor login ID
-const generateDoctorLoginId = async (mongoClient) => {
-  let isUnique = false;
-  let loginId;
-  
-  while (!isUnique) {
-    // Generate random 4 digit number
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    loginId = `DOC1${randomNum}`;
-    
-    // Check if this ID already exists in the database
-    const existingDoctor = await mongoClient
+// Function to generate a unique doctorId like DOC-87234557
+const generateUniqueDoctorId = async (mongoClient) => {
+  let doctorId;
+  let exists = true;
+
+  while (exists) {
+    const timestampPart = Date.now().toString().slice(-6); // last 6 digits
+    const randomPart = Math.floor(10 + Math.random() * 90); // 2-digit random number
+    doctorId = `DOC-${timestampPart}${randomPart}`;
+
+    const existing = await mongoClient
       .db("medenix")
       .collection("doctors")
-      .findOne({ doctorLoginId: loginId });
-    
-    // If no doctor found with this ID, it's unique
-    if (!existingDoctor) {
-      isUnique = true;
-    }
+      .findOne({ doctorId });
+
+    if (!existing) exists = false;
   }
-  
-  return loginId;
+
+  return doctorId;
 };
 
 export const registerDoctor = async (event, context) => {
@@ -52,18 +48,18 @@ export const registerDoctor = async (event, context) => {
       password,
     } = requestBody;
 
-    // Validate password
     if (!password) {
       throw new Error("Password is required");
     }
 
-    // Generate a unique doctor login ID
-    const loginID = await generateDoctorLoginId(mongoClient);
+    // Generate unique doctorId
+    const doctorId = await generateUniqueDoctorId(mongoClient);
 
-    // Hash password before storing it
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const doctorData = {
+      doctorId,
       ...(name && { name }),
       ...(dob && { dob }),
       ...(gender && { gender }),
@@ -76,9 +72,8 @@ export const registerDoctor = async (event, context) => {
       ...(yearsOfExperience && { yearsOfExperience }),
       ...(degreeInstitution && { degreeInstitution }),
       ...(governmentID && { governmentID }),
-      password: hashedPassword, // Store hashed password
-      isApproved: false, // Default to false (waiting for admin approval)
-      doctorLoginId : loginID, // Set the generated login ID
+      password: hashedPassword,
+      isApproved: false,
     };
 
     const savedDoctor = await mongoClient
@@ -88,15 +83,15 @@ export const registerDoctor = async (event, context) => {
 
     if (savedDoctor.acknowledged) {
       console.log("Doctor registered successfully =>", savedDoctor);
+
+      const { password: _, ...sanitizedDoctorData } = doctorData;
+
       return {
         statusCode: 200,
-        body: {
+        body:{
           response: true,
           message: "Doctor registered successfully. Awaiting admin approval.",
-          doctorData: {
-            ...doctorData,
-            password: undefined, // Remove password from response
-          },
+          doctorData: sanitizedDoctorData,
         },
       };
     } else {

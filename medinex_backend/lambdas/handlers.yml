@@ -16,3 +16,15 @@ getDoctorDetailsByLoginId:
   handler: lambdas/index.getDoctorDetails
 getPatientDetialsByNumber:
   handler: lambdas/index.getPatientDetails
+addAppointment:
+  handler: lambdas/index.addAppointment
+getAppointmentsByPatientId:
+  handler: lambdas/index.getAppointmentPatient
+getAppointmentsByDoctorId:
+  handler: lambdas/index.getAppointmentDoctor
+cancelAppointment:
+  handler: lambdas/index.deleteAppointment
+getVerifiedDoctors:
+  handler: lambdas/index.getVerifiedDoctors
+getAvailableSlots:
+  handler: lambdas/index.getAppointmentsByDoctorIdAndDate

@@ -4,8 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/assets.dart';
 import 'package:medinix_frontend/constants/routes.dart';
-import 'package:medinix_frontend/repositories/login_repo.dart';
-import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
+import 'package:medinix_frontend/repositories/auth_repo.dart';
+import 'package:medinix_frontend/repositories/patient_repository.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -77,7 +77,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
 
     try {
-      final verifyResponse = await LoginRepo().verifyOtp(
+      final verifyResponse = await AuthRepo().verifyOtp(
         widget.phoneNumber,
         otp,
       );
@@ -86,7 +86,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       if (verifyResponse["statusCode"] == 200 &&
           verifyBody != null &&
           verifyBody["message"] == "OTP verified successfully") {
-        final loginResponse = await LoginRepo().loginPatient(
+        final loginResponse = await PatientRepo().loginPatient(
           widget.phoneNumber,
         );
         print("login response: $loginResponse");

@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/assets.dart';
 import 'package:medinix_frontend/constants/routes.dart';
-import 'package:medinix_frontend/repositories/login_repo.dart';
+import 'package:medinix_frontend/repositories/doctor_repository.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DoctorLoginScreen extends StatefulWidget {
@@ -34,7 +34,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
       });
 
       try {
-        final response = await LoginRepo().loginDoctor(
+        final response = await DoctorRepo().loginDoctor(
           _idController.text,
           _passwordController.text,
         );

@@ -7,3 +7,10 @@ class SVGAssets {
   static const String pendingApprovalSvg = "$svgBasePath/pending_approval.svg";
   static const String supportSvg = "$svgBasePath/support.svg";
 }
+
+class PNGAssets {
+  static const String pngBasePath = "assets/pngs";
+  static const String morningPng = "$pngBasePath/good_morning.png";
+  static const String afternoonPng = "$pngBasePath/good_afternoon.png";
+  static const String nightPng = "$pngBasePath/good_evening.png";
+}

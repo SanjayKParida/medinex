@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/assets.dart';
 import 'package:medinix_frontend/constants/routes.dart';
-import 'package:medinix_frontend/repositories/login_repo.dart';
+import 'package:medinix_frontend/repositories/auth_repo.dart';
 
 class PatientLoginScreen extends StatefulWidget {
   const PatientLoginScreen({super.key});
@@ -124,7 +124,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
                       final phoneNumber = "+91${_phoneController.text}";
                       print("Phone for API: $phoneNumber");
 
-                      await LoginRepo().sendOtp(phoneNumber);
+                      await AuthRepo().sendOtp(phoneNumber);
 
                       setState(() {
                         _isLoading = false;

@@ -43,7 +43,11 @@ export const registerPatient = async (event, context) => {
       };
     }
 
+    // ✅ Generate human-readable unique patient ID
+    const patientId = `PAT-${Date.now().toString().slice(-6)}${Math.floor(10 + Math.random() * 90)}`;
+
     const userData = {
+      patientId,
       ...(name && { name }),
       ...(dob && { dob }),
       ...(weight && { weight }),

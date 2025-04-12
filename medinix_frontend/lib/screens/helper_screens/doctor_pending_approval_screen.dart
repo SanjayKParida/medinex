@@ -19,7 +19,7 @@ class _DoctorPendingApprovalScreenState
     final prefsService = SharedPreferencesService.getInstance();
     await prefsService.logout();
 
-    Navigator.pushReplacementNamed(context, Routes.loginScreen);
+    Navigator.pushReplacementNamed(context, Routes.doctorLoginScreen);
   }
 
   @override

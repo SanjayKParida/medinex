@@ -3,8 +3,9 @@ import 'package:medinix_frontend/screens/auth_screens/doctor_login_screen.dart';
 import 'package:medinix_frontend/screens/auth_screens/login_screen.dart';
 import 'package:medinix_frontend/screens/auth_screens/otp_verification_screen.dart';
 import 'package:medinix_frontend/screens/auth_screens/patient_login_screen.dart';
-import 'package:medinix_frontend/screens/dashboard/doctor_dashboard.dart';
-import 'package:medinix_frontend/screens/dashboard/patient_dashboard.dart';
+import 'package:medinix_frontend/screens/features/doctor/doctor_dashboard.dart';
+import 'package:medinix_frontend/screens/features/patient/home/appointment_booking_screen.dart';
+import 'package:medinix_frontend/screens/features/patient/patient_dashboard.dart';
 import 'package:medinix_frontend/screens/helper_screens/doctor_detail_screen.dart';
 import 'package:medinix_frontend/screens/helper_screens/doctor_pending_approval_screen.dart';
 import 'package:medinix_frontend/screens/helper_screens/forgot_password_screen.dart';
@@ -21,6 +22,7 @@ class Routes {
   static const String patientDetailScreen = "/patientDetailScreen";
   static const String loginScreen = "/loginScreen";
   static const String forgotPasswordScreen = "/forgotPasswordScreen";
+  static const String appointmentBookingScreen = "/appointmentBookingScreen";
   static const String doctorDetailScreen = "/doctorDetailScreen";
   static const String doctorPendingApprovalScreen =
       "/doctorPendingApprovalScreen";
@@ -35,6 +37,12 @@ class Routes {
     loginScreen: (context) => LoginScreen(),
     patientDetailScreen: (context) => PatientDetailScreen(),
     forgotPasswordScreen: (context) => ForgotPasswordScreen(),
+    appointmentBookingScreen: (context) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+          return AppointmentBookingScreen(pickedDoctor: args['pickedDoctor']);
+
+    },
     doctorPendingApprovalScreen: (context) => DoctorPendingApprovalScreen(),
     otpVerificationScreen: (context) {
       final args =
