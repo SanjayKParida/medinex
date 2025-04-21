@@ -12,6 +12,7 @@ import { getAppointmentsByDoctorId } from "./getAppointmentDoctor.js";
 import { cancelAppointment } from "./cancelAppointment.js";
 import { getApprovedDoctors } from "./getVerifiedDoctors.js";
 import { getAvailableSlots } from "./appointmentsByDoctorIdDate.js";
+import { handler as getDoctorPatientsHandler } from "./getDoctorPatients.js";
 
 export const sendOTP = sendOtp;
 export const verifyOTP = verifyOtp;
@@ -28,3 +29,4 @@ export const getAppointmentDoctor = getAppointmentsByDoctorId;
 export const deleteAppointment = cancelAppointment;
 export const getVerifiedDoctors = getApprovedDoctors;
 export const getAppointmentsByDoctorIdAndDate = getAvailableSlots;
+export const getDoctorPatients = getDoctorPatientsHandler;

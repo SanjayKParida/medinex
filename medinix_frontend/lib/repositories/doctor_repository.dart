@@ -1,16 +1,13 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:medinix_frontend/utilities/models.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 
 class DoctorRepo {
   final String baseUrl = dotenv.env['API_BASE_URL']!;
   final SharedPreferencesService _prefsService =
       SharedPreferencesService.getInstance();
-
-
-
-
 
   Future<Map<String, dynamic>> registerDoctor(
     Map<String, dynamic> doctorData,
@@ -82,7 +79,7 @@ class DoctorRepo {
       final response = await http.post(
         url,
         body: jsonEncode({
-          "doctorLoginId": doctorLoginId,
+          "doctorId": doctorLoginId,
           "password": password,
         }),
         headers: {"Content-Type": "application/json"},
@@ -129,6 +126,66 @@ class DoctorRepo {
         "statusCode": 500,
         "body": {"message": "Something went wrong", "error": e.toString()},
       };
+    }
+  }
+
+  //Get Doctor's Patients
+  Future<Map<String, dynamic>> getDoctorPatients() async {
+    try {
+      // Reset the singleton data
+      DoctorPatients().patientsLoaded = false;
+      DoctorPatients().errorMessage = null;
+      DoctorPatients().patientsList = [];
+
+      // Get doctor ID from shared preferences
+      final userDetails = _prefsService.getUserDetails();
+      final doctorId = userDetails?['doctorId'];
+      print("doctor id: $doctorId");
+
+      if (doctorId == null) {
+        DoctorPatients().errorMessage =
+            "Doctor ID not found. Please log in again.";
+        return {'success': false, 'message': DoctorPatients().errorMessage};
+      }
+
+      final url = Uri.parse('$baseUrl/get-doctor-patients');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'doctorId': doctorId}),
+      );
+
+      final responseData = jsonDecode(response.body);
+      print("Patient response: $responseData");
+
+      // Access the body object from the response
+      final body = responseData['body'] ?? responseData;
+      final isSuccess = body['response'] == true;
+
+      if (response.statusCode == 200 && isSuccess) {
+        final List<dynamic> patientsData = body['data'] ?? [];
+
+        // Convert dynamic list to List<Map<String, dynamic>>
+        final List<Map<String, dynamic>> patients =
+            patientsData
+                .map((patient) => Map<String, dynamic>.from(patient))
+                .toList();
+
+        // Store patients in the singleton
+        DoctorPatients().patientsList = patients;
+        DoctorPatients().patientsLoaded = true;
+
+        return {'success': true, 'data': patients};
+      } else {
+        final errorMsg =
+            body['message'] ?? "Failed to fetch patients. Please try again.";
+        DoctorPatients().errorMessage = errorMsg;
+        return {'success': false, 'message': errorMsg};
+      }
+    } catch (e) {
+      final errorMsg = "An error occurred: $e";
+      DoctorPatients().errorMessage = errorMsg;
+      return {'success': false, 'message': errorMsg};
     }
   }
 }

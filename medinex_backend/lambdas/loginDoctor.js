@@ -9,9 +9,9 @@ export const loginDoctor = async (event, context) => {
   try {
     console.log("Doctor Login Event Received ::: ", event);
     mongoClient = await getMongoClient();
-    const { doctorLoginId, password } = event;
+    const { doctorId, password } = event;
 
-    if (!doctorLoginId || !password) {
+    if (!doctorId || !password) {
       return {
         statusCode: 400,
         body: {
@@ -24,7 +24,7 @@ export const loginDoctor = async (event, context) => {
     const doctor = await mongoClient
       .db("medenix")
       .collection("doctors")
-      .findOne({ doctorLoginId });
+      .findOne({ doctorId });
 
     if (!doctor) {
       return {

@@ -1,4 +1,3 @@
-
 org: prtcl
 app: medinex
 service: medinex-backend
@@ -9,6 +8,56 @@ provider:
   region: ap-south-1
   stage: dev
 
-functions: ${file(./lambdas/handlers.yml)}
-  
+functions:
+  # HTTP API handlers
+  getOtp:
+    handler: lambdas/index.sendOTP
+  verifyOtp:
+    handler: lambdas/index.verifyOTP
+  registerPatient:
+    handler: lambdas/index.addPatient
+  registerDoctor:
+    handler: lambdas/index.addDoctor
+  loginPatient:
+    handler: lambdas/index.patientLogin
+  loginDoctor:
+    handler: lambdas/index.doctorLogin
+  setDoctorPassword:
+    handler: lambdas/index.createDoctorPassword
+  getDoctorDetailsByLoginId:
+    handler: lambdas/index.getDoctorDetails
+  getPatientDetialsByNumber:
+    handler: lambdas/index.getPatientDetails
+  addAppointment:
+    handler: lambdas/index.addAppointment
+  getAppointmentsByPatientId:
+    handler: lambdas/index.getAppointmentPatient
+  getAppointmentsByDoctorId:
+    handler: lambdas/index.getAppointmentDoctor
+  cancelAppointment:
+    handler: lambdas/index.deleteAppointment
+  getVerifiedDoctors:
+    handler: lambdas/index.getVerifiedDoctors
+  getAvailableSlots:
+    handler: lambdas/index.getAppointmentsByDoctorIdAndDate
+  getDoctorPatients:
+    handler: lambdas/index.getDoctorPatients
 
+  #Websocket handlers
+  wsConnect:
+    handler: lambdas/websocket/index.wsConnect
+    events:
+      - websocket:
+          route: $connect
+
+  wsDisconnect:
+    handler: lambdas/websocket/index.wsDisconnect
+    events:
+      - websocket:
+          route: $disconnect
+
+  wsSendMessage:
+    handler: lambdas/websocket/index.wsSendMessage
+    events:
+      - websocket:
+          route: $default

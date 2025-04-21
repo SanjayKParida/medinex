@@ -175,7 +175,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,34 +183,35 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               // SVG Image
               Center(
                 child: SvgPicture.asset(
-                  SVGAssets
-                      .otpVerificationSvg, // Replace with your actual SVG asset
-                  height: 220,
+                  SVGAssets.otpVerificationSvg,
+                  height: 180,
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 24),
 
               // Header
               Text(
                 "Verification Code",
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w600,
-                  fontSize: 24,
+                  fontSize: 22,
+                  color: Colors.grey.shade900,
                 ),
               ),
 
-              SizedBox(height: 10),
+              SizedBox(height: 8),
 
               // Phone info text
               Text(
-                "We have sent the verification code to\n ${widget.phoneNumber}",
+                "We have sent the verification code to\n${widget.phoneNumber}",
                 style: GoogleFonts.poppins(
                   color: Colors.grey[600],
                   fontSize: 14,
+                  height: 1.4,
                 ),
               ),
 
-              SizedBox(height: 30),
+              SizedBox(height: 24),
 
               // OTP Fields
               Row(
@@ -244,7 +245,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ],
               ),
 
-              SizedBox(height: 30),
+              SizedBox(height: 32),
 
               // Verify Button
               ElevatedButton(
@@ -259,19 +260,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: Size(double.infinity, 54),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  elevation: 4,
+                  shadowColor: Colors.teal.withOpacity(0.3),
                 ),
                 child:
                     _isLoading
                         ? SizedBox(
-                          height: 20.0,
-                          width: 20.0,
+                          height: 22.0,
+                          width: 22.0,
                           child: Center(
                             child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
+                              strokeWidth: 2,
                               color: Colors.white,
                             ),
                           ),
@@ -279,8 +282,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         : Text(
                           "Verify",
                           style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
                             color: Colors.white,
                           ),
                         ),
@@ -308,7 +311,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             : "Wait $_remainingSeconds seconds",
                         style: GoogleFonts.poppins(
                           color: _canResend ? Colors.teal : Colors.grey,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
                       ),
@@ -331,12 +334,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     bool isLastField = false,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5),
-      width: 65,
+      padding: EdgeInsets.symmetric(vertical: 6),
+      width: 68,
+      height: 68,
       decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey),
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: TextField(
         controller: controller,
@@ -367,7 +378,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(1),
         ],
-        style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
+        style: GoogleFonts.poppins(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade800,
+        ),
       ),
     );
   }

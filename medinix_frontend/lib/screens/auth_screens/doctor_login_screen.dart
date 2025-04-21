@@ -34,16 +34,21 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
       });
 
       try {
+        print("id: ${_idController.text}");
+        print("password: ${_passwordController.text}");
         final response = await DoctorRepo().loginDoctor(
           _idController.text,
           _passwordController.text,
         );
+
+        print("response: $response");
 
         final statusCode = response['statusCode'];
         final body = response['body'];
         final isApproved = response['isApproved'] ?? false;
 
         if (statusCode == 200) {
+          print("body: $body");
           if (isApproved == true) {
             Navigator.pushReplacementNamed(context, Routes.doctorDashboard);
           } else {
@@ -104,22 +109,45 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                     Center(
                       child: SvgPicture.asset(
                         SVGAssets.doctorLoginSvg,
-                        height: 250,
+                        height: 180,
                       ),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 20),
 
                     // ID field
                     TextFormField(
                       controller: _idController,
                       decoration: InputDecoration(
                         labelText: 'Doctor ID',
-                        prefixIcon: Icon(PhosphorIcons.hospital()),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
+                        labelStyle: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w500,
                         ),
+                        prefixIcon: Icon(
+                          PhosphorIcons.hospital(),
+                          color: Colors.teal.shade700,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.teal.shade400,
+                            width: 1.5,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        contentPadding: EdgeInsets.symmetric(vertical: 16),
                       ),
                       keyboardType: TextInputType.text,
+                      style: TextStyle(fontWeight: FontWeight.w500),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your ID';
@@ -134,12 +162,20 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                       controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        prefixIcon: Icon(PhosphorIcons.lock()),
+                        labelStyle: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          PhosphorIcons.lock(),
+                          color: Colors.teal.shade700,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
                                 ? PhosphorIcons.eye()
                                 : PhosphorIcons.eyeClosed(),
+                            color: Colors.grey.shade600,
                           ),
                           onPressed: () {
                             setState(() {
@@ -148,10 +184,26 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                           },
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.teal.shade400,
+                            width: 1.5,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        contentPadding: EdgeInsets.symmetric(vertical: 16),
                       ),
                       obscureText: _obscurePassword,
+                      style: TextStyle(fontWeight: FontWeight.w500),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your password';
@@ -171,6 +223,9 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                             Routes.forgotPasswordScreen,
                           );
                         },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.teal.shade700,
+                        ),
                         child: Text(
                           'Forgot Password?',
                           style: GoogleFonts.poppins(
@@ -188,28 +243,32 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal,
                         foregroundColor: Colors.white,
-
                         padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                        shadowColor: Colors.teal.withOpacity(0.3),
                       ),
                       child:
                           _isLoading
                               ? const SizedBox(
-                                height: 20,
-                                width: 20,
+                                height: 22,
+                                width: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   color: Colors.white,
                                 ),
                               )
-                              : const Text(
+                              : Text(
                                 'Login',
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                     ),
-                    const SizedBox(height: 25),
+                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.05),
 
                     // Register link
                     Row(
@@ -218,8 +277,9 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                         Text(
                           "New doctor registration?",
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w400,
+                            color: Colors.grey.shade700,
                           ),
                         ),
                         TextButton(
@@ -230,10 +290,14 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                               Routes.doctorDetailScreen,
                             );
                           },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.teal.shade700,
+                            padding: EdgeInsets.symmetric(horizontal: 4),
+                          ),
                           child: Text(
                             'Register Now',
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

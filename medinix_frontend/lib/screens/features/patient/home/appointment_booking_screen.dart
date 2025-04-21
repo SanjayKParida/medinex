@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:medinix_frontend/repositories/booking_repo.dart';
+import 'package:medinix_frontend/screens/features/patient/home/home_screen.dart';
 import 'package:medinix_frontend/utilities/models.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -127,18 +128,40 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
+              duration: Duration(seconds: 2),
               content: Text('Appointment booked successfully!'),
               backgroundColor: Colors.teal,
             ),
           );
-
-          Navigator.pop(context);
         }
+
+        Appointments().patientAppointmentsList.add(
+          AppointmentModel(
+            id: widget.pickedDoctor.id,
+            patientId: userDetails?['patientId'],
+            doctorId: widget.pickedDoctor.doctorId,
+            date: formatDate(selectedDate!),
+            time: selectedSlot!,
+            reason: "general checkup",
+            status: "confirmed",
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        HomeScreen.homeKey.currentState?.setState(() {});
+
+        // print(
+        //   "Appointment List :: ${PatientAppointments().patientAppointmentsList}",
+        // );
+        setState(() => isBooking = false);
+
+        Navigator.pop(context);
       } else {
         setState(() => isBooking = false);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            duration: Duration(seconds: 2),
             content: Text(
               response['message'],
               style: TextStyle(color: Colors.teal),
@@ -150,6 +173,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: Duration(seconds: 2),
           content: Text(
             "Error occurred : $e",
             style: TextStyle(color: Colors.teal),

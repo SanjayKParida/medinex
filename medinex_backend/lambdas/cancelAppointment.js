@@ -6,14 +6,24 @@ export const cancelAppointment = async (event, context) => {
 
   try {
     const mongoClient = await getMongoClient();
-    const { appointmentId } = event;
+    const { appointmentId, reason, cancelledBy } = event;
 
     const result = await mongoClient
       .db("medenix")
       .collection("appointments")
-      .deleteOne({ _id: new ObjectId(appointmentId) });
+      .updateOne(
+        { _id: new ObjectId(appointmentId) },
+        {
+          $set: {
+            status: "cancelled",
+            cancellationReason: reason,
+            cancelledBy: cancelledBy,
+            cancelledAt: new Date(),
+          },
+        }
+      );
 
-    if (result.deletedCount === 0) {
+    if (result.matchedCount === 0) {
       return {
         statusCode: 404,
         body: JSON.stringify({

@@ -29,7 +29,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -39,39 +39,56 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
                 Center(
                   child: SvgPicture.asset(
                     SVGAssets.patientLoginSvg,
-                    height: 250,
+                    height: 200,
                   ),
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 24),
 
                 Text(
                   "Enter your phone number",
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     fontSize: 20,
+                    color: Colors.grey.shade800,
                   ),
                 ),
 
-                SizedBox(height: 15),
+                SizedBox(height: 12),
 
                 //Phone Text Field
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: Colors.grey.shade300),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                    color: Colors.white,
                   ),
                   child: Row(
                     children: [
                       // Always visible prefix
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           '+91',
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ),
                       // Vertical divider
-                      Container(height: 30, width: 1, color: Colors.grey),
+                      Container(
+                        height: 30,
+                        width: 1,
+                        color: Colors.grey.shade300,
+                      ),
                       // Phone input field
                       Expanded(
                         child: Focus(
@@ -84,13 +101,22 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
                             controller: _phoneController,
                             keyboardType: TextInputType.number,
                             maxLength: 10,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                             decoration: InputDecoration(
                               hintText: 'Enter phone number',
+                              hintStyle: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontWeight: FontWeight.normal,
+                              ),
                               counterText: '',
                               filled: true,
                               fillColor: Colors.transparent,
                               contentPadding: EdgeInsets.symmetric(
-                                horizontal: 10,
+                                horizontal: 12,
+                                vertical: 16,
                               ),
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
@@ -112,7 +138,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
                   ),
                 ),
 
-                SizedBox(height: MediaQuery.sizeOf(context).height * 0.08),
+                SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
 
                 Center(
                   child: GestureDetector(
@@ -140,20 +166,27 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(16),
                         color: Colors.teal,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.teal.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      height: 50,
+                      height: 54,
                       width: MediaQuery.sizeOf(context).width * 0.7,
                       child: Center(
                         child:
                             _isLoading
                                 ? SizedBox(
-                                  height: 20.0,
-                                  width: 20.0,
+                                  height: 22.0,
+                                  width: 22.0,
                                   child: Center(
                                     child: CircularProgressIndicator(
-                                      strokeWidth: 1.5,
+                                      strokeWidth: 2,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -161,8 +194,8 @@ class _PatientLoginScreenState extends State<PatientLoginScreen> {
                                 : Text(
                                   "Continue",
                                   style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
                                     color: Colors.white,
                                   ),
                                 ),

@@ -4,7 +4,7 @@ import 'package:medinix_frontend/utilities/models.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppointmentCard extends StatelessWidget {
-  final PatientAppointmentModel appointment;
+  final AppointmentModel appointment;
   final VoidCallback? onTap;
 
   const AppointmentCard({super.key, required this.appointment, this.onTap});
@@ -85,7 +85,7 @@ class AppointmentCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
+        width: MediaQuery.of(context).size.width,
         margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),

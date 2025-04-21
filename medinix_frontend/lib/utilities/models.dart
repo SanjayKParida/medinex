@@ -1,3 +1,5 @@
+import 'package:medinix_frontend/constants/assets.dart';
+
 class PatientDetails {
   //Private constructor
   PatientDetails._internal();
@@ -54,21 +56,21 @@ class DoctorDetails {
   String governmentID = "";
 }
 
-class PatientAppointments {
-  PatientAppointments._internal();
-  static final PatientAppointments patientAppointments =
-      PatientAppointments._internal();
+class Appointments {
+  Appointments._internal();
+  static final Appointments patientAppointments = Appointments._internal();
 
-  factory PatientAppointments() {
+  factory Appointments() {
     return patientAppointments;
   }
 
-  List<PatientAppointmentModel> patientAppointmentsList = [];
+  List<AppointmentModel> doctorAppointmentsList = [];
+  List<AppointmentModel> patientAppointmentsList = [];
 
-  bool patientAppointmentsLoaded = false;
+  bool appointmentsLoaded = false;
 }
 
-class PatientAppointmentModel {
+class AppointmentModel {
   final String id;
   final String patientId;
   final String doctorId;
@@ -78,7 +80,7 @@ class PatientAppointmentModel {
   final String status;
   final DateTime createdAt;
 
-  PatientAppointmentModel({
+  AppointmentModel({
     required this.id,
     required this.patientId,
     required this.doctorId,
@@ -90,8 +92,8 @@ class PatientAppointmentModel {
   });
 
   // Convert JSON to Appointment
-  factory PatientAppointmentModel.fromJson(Map<String, dynamic> json) {
-    return PatientAppointmentModel(
+  factory AppointmentModel.fromJson(Map<String, dynamic> json) {
+    return AppointmentModel(
       id: json['_id'] ?? '',
       patientId: json['patientId'] ?? '',
       doctorId: json['doctorId'] ?? '',
@@ -105,6 +107,56 @@ class PatientAppointmentModel {
     );
   }
 }
+
+class HealthTip {
+  final String title;
+  final String summary;
+  final String? imagePath;
+
+  const HealthTip({required this.title, required this.summary, this.imagePath});
+
+  // Factory method to create from Map
+  factory HealthTip.fromMap(Map<String, String> map) {
+    return HealthTip(
+      title: map['title'] ?? '',
+      summary: map['summary'] ?? '',
+      imagePath: map['image'],
+    );
+  }
+}
+
+// Health Articles using the HealthTip class
+final List<HealthTip> healthTips = [
+  HealthTip(
+    title: 'Stay Hydrated',
+    summary:
+        'Drinking 2-3 liters of water daily helps flush out toxins and boosts energy.',
+    imagePath: SVGAssets.drinkingSvg,
+  ),
+  HealthTip(
+    title: 'Get Enough Sleep',
+    summary:
+        'Aim for 7-9 hours of sleep to improve memory, immunity, and mood.',
+    imagePath: SVGAssets.sleepingSvg,
+  ),
+  HealthTip(
+    title: 'Eat More Greens',
+    summary:
+        'Leafy vegetables are rich in vitamins and fiber for a healthy gut.',
+    imagePath: SVGAssets.greensSvg,
+  ),
+  HealthTip(
+    title: 'Take Regular Walks',
+    summary:
+        'Just 30 minutes of walking a day can enhance heart health and reduce stress.',
+    imagePath: SVGAssets.walkingSvg,
+  ),
+  HealthTip(
+    title: 'Practice Deep Breathing',
+    summary: 'Calm your mind and body with 5-minute breathing exercises daily.',
+    imagePath: SVGAssets.breathingSvg,
+  ),
+];
 
 class ApprovedDoctors {
   //Private Constructor
@@ -171,4 +223,21 @@ class VerifiedDoctor {
       isApproved: json['isApproved'] ?? false,
     );
   }
+}
+
+class DoctorPatients {
+  //Private constructor
+  DoctorPatients._internal();
+
+  //Single instance of the class
+  static final DoctorPatients doctorPatients = DoctorPatients._internal();
+
+  //Factory constructor for the class
+  factory DoctorPatients() {
+    return doctorPatients;
+  }
+
+  List<Map<String, dynamic>> patientsList = [];
+  bool patientsLoaded = false;
+  String? errorMessage;
 }

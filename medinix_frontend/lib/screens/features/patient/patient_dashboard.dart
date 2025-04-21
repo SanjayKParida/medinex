@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/screens/features/patient/appointments/appointments_screen.dart';
 import 'package:medinix_frontend/screens/features/patient/home/home_screen.dart';
 import 'package:medinix_frontend/screens/features/patient/profile/profile_screen.dart';
-import 'package:medinix_frontend/screens/features/patient/qr_bottom_sheet_widget.dart';
+import 'package:medinix_frontend/widgets/qr_bottom_sheet_widget.dart';
 import 'package:medinix_frontend/screens/features/patient/records/records_screen.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -14,67 +14,81 @@ class PatientDashboard extends StatefulWidget {
   State<PatientDashboard> createState() => _PatientDashboardState();
 }
 
+// Export the state class for use in other files
 class _PatientDashboardState extends State<PatientDashboard> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
+  final List<Widget> _screens = [
+    HomeScreen(key: HomeScreen.homeKey),
     AppointmentsScreen(),
     RecordsScreen(),
     ProfileScreen(),
   ];
 
+  // Method to navigate to a specific tab
+  void navigateToTab(int index) {
+    if (index >= 0 && index < _screens.length) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: SizedBox(
-        height: 70,
-        child: BottomNavigationBar(
-          selectedLabelStyle: GoogleFonts.poppins(),
-          selectedItemColor: Colors.teal,
-          unselectedItemColor: Colors.grey,
-          type: BottomNavigationBarType.fixed,
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(
-                _selectedIndex == 0
-                    ? PhosphorIcons.house(PhosphorIconsStyle.fill)
-                    : PhosphorIcons.house(),
+      bottomNavigationBar: Material(
+        elevation: 100,
+        shadowColor: Colors.teal,
+        child: SizedBox(
+          height: 70,
+          child: BottomNavigationBar(
+            selectedLabelStyle: GoogleFonts.poppins(),
+            selectedItemColor: Colors.teal,
+            unselectedItemColor: Colors.grey,
+            type: BottomNavigationBarType.fixed,
+            currentIndex: _selectedIndex,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 0
+                      ? PhosphorIcons.house(PhosphorIconsStyle.fill)
+                      : PhosphorIcons.house(),
+                ),
+                label: 'Home',
               ),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                _selectedIndex == 1
-                    ? PhosphorIcons.hospital(PhosphorIconsStyle.fill)
-                    : PhosphorIcons.hospital(),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 1
+                      ? PhosphorIcons.hospital(PhosphorIconsStyle.fill)
+                      : PhosphorIcons.hospital(),
+                ),
+                label: 'Visits',
               ),
-              label: 'Visits',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                _selectedIndex == 2
-                    ? PhosphorIcons.filmScript(PhosphorIconsStyle.fill)
-                    : PhosphorIcons.filmScript(),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 2
+                      ? PhosphorIcons.filmScript(PhosphorIconsStyle.fill)
+                      : PhosphorIcons.filmScript(),
+                ),
+                label: 'Records',
               ),
-              label: 'Records',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                _selectedIndex == 3
-                    ? PhosphorIcons.user(PhosphorIconsStyle.fill)
-                    : PhosphorIcons.user(),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 3
+                      ? PhosphorIcons.tooth(PhosphorIconsStyle.fill)
+                      : PhosphorIcons.tooth(),
+                ),
+                label: 'Portal',
               ),
-              label: 'Profile',
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: Container(

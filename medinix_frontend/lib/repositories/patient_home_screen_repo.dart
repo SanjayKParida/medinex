@@ -22,12 +22,12 @@ class PatientHomeScreenRepo {
         print("patient appoinments :: ${data['body']['appointments']}");
 
         for (var json in data['body']['appointments']) {
-          PatientAppointments().patientAppointmentsList.add(
-            PatientAppointmentModel.fromJson(json),
+          Appointments().patientAppointmentsList.add(
+            AppointmentModel.fromJson(json),
           );
         }
         print(
-          "Patient Appointments from the API ${PatientAppointments().patientAppointmentsList}",
+          "Patient Appointments from the API ${Appointments().patientAppointmentsList}",
         );
 
         return {
