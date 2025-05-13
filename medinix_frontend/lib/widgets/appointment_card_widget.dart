@@ -6,8 +6,14 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 class AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
   final VoidCallback? onTap;
+  final Function(String)? onCancelTap;
 
-  const AppointmentCard({super.key, required this.appointment, this.onTap});
+  const AppointmentCard({
+    super.key,
+    required this.appointment,
+    this.onTap,
+    this.onCancelTap,
+  });
 
   // Get status-specific icons
   IconData _getStatusIcon() {
@@ -76,8 +82,14 @@ class AppointmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Format the date
     final DateFormat dateFormatter = DateFormat('EEE, MMM d');
-    final DateTime parsedDate = DateTime.parse(appointment.date);
-    final String formattedDate = dateFormatter.format(parsedDate);
+    String formattedDate;
+
+    try {
+      final parsedDate = DateTime.parse(appointment.date);
+      formattedDate = dateFormatter.format(parsedDate);
+    } catch (e) {
+      formattedDate = appointment.date; // Fallback to raw date if parsing fails
+    }
 
     // Get the gradient colors based on status
     final gradientColors = _getGradientColors();
@@ -160,43 +172,37 @@ class AppointmentCard extends StatelessWidget {
                           ],
                         ),
                       ),
-
+                      SizedBox(width: 10),
                       // Status chip
-                      appointment.status != "confirmed"
-                          ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getStatusIcon(),
+                              color: _getStatusColor(),
+                              size: 16,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                            const SizedBox(width: 4),
+                            Text(
+                              appointment.status,
+                              style: TextStyle(
+                                color: _getStatusColor(),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _getStatusIcon(),
-                                  color: _getStatusColor(),
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  appointment.status,
-                                  style: TextStyle(
-                                    color: _getStatusColor(),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                          : _buildActionButton(
-                            icon: PhosphorIcons.xCircle(),
-                            label: "Cancel",
-                            onTap: () {},
-                          ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
 

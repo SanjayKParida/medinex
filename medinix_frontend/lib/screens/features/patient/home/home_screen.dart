@@ -1,17 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/assets.dart';
 import 'package:medinix_frontend/constants/routes.dart';
+import 'package:medinix_frontend/repositories/appointment_repository.dart';
 import 'package:medinix_frontend/repositories/patient_home_screen_repo.dart';
-import 'package:medinix_frontend/screens/features/patient/patient_dashboard.dart';
+import 'package:medinix_frontend/screens/features/patient/appointments/appointments_screen.dart';
+
 import 'package:medinix_frontend/utilities/models.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 import 'package:medinix_frontend/widgets/appointment_card_widget.dart';
 import 'package:medinix_frontend/widgets/health_tips_card_widget.dart';
 import 'package:medinix_frontend/widgets/top_pick_card_widget.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,9 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void loadPatientAppointments() async {
+    if (Appointments().appointmentsLoaded && !isAppointmentLoading) {
+      setState(() {
+        isAppointmentLoading = false;
+      });
+      return;
+    }
+
     setState(() {
       isAppointmentLoading = true;
     });
+
     SharedPreferencesService prefs = SharedPreferencesService.getInstance();
     final userData = prefs.getUserDetails();
     try {
@@ -98,6 +108,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Add status bar configuration
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+    );
+
     return Scaffold(
       body: RefreshIndicator(
         color: Colors.teal,
@@ -217,108 +236,88 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAppointmentsSection() {
-    final appointments = Appointments().patientAppointmentsList;
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 8, 20, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  "Upcoming Appointments",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade800,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Find the ancestor of type PatientDashboard and navigate to appointments tab
-                  final state =
-                      context
-                          .findAncestorStateOfType<State<PatientDashboard>>();
-                  if (state != null) {
-                    // Using dynamic invocation for navigateToTab method
-                    try {
-                      (state as dynamic).navigateToTab(
-                        1,
-                      ); // 1 is the index for Appointments tab
-                    } catch (e) {
-                      print('Error navigating to appointments: $e');
-                    }
-                  }
-                },
-                child: Text(
-                  'View All',
-                  style: GoogleFonts.poppins(
-                    color: Colors.teal,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.28,
-            child:
-                isAppointmentLoading
-                    ? const Center(
-                      child: CupertinoActivityIndicator(color: Colors.teal),
-                    )
-                    : appointments.isNotEmpty
-                    ? Column(
-                      children: [
-                        Expanded(
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemCount: appointments.length,
-                            onPageChanged: (index) {
-                              setState(() {
-                                currentPage = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4.0,
-                                ),
-                                child: AppointmentCard(
-                                  appointment: appointments[index],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SmoothPageIndicator(
-                          controller: _pageController,
-                          count: appointments.length,
-                          effect: JumpingDotEffect(
-                            dotHeight: 8,
-                            dotWidth: 8,
-                            activeDotColor: Colors.teal,
-                            dotColor: Colors.teal.shade100,
-                          ),
-                        ),
-                      ],
-                    )
-                    : _buildEmptyState(
-                      'No appointments scheduled',
-                      'Book an appointment with a doctor to get started',
-                      PhosphorIcons.calendar(),
+    return isAppointmentLoading
+        ? _buildLoadingAppointments()
+        : Appointments().patientAppointmentsList.isNotEmpty
+        ? Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Upcoming Appointments",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
-          ),
-        ],
-      ),
-    );
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Simple navigation to appointments screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AppointmentsScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "View All",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.teal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: MediaQuery.sizeOf(context).height * 0.25,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(left: 20, right: 10),
+                itemCount:
+                    Appointments().patientAppointmentsList.length > 3
+                        ? 3
+                        : Appointments().patientAppointmentsList.length,
+                itemBuilder: (context, index) {
+                  // Sort appointments by date to show latest first
+                  final sortedAppointments = [
+                    ...Appointments().patientAppointmentsList,
+                  ];
+                  sortedAppointments.sort(
+                    (a, b) => DateTime.parse(
+                      b.date,
+                    ).compareTo(DateTime.parse(a.date)),
+                  );
+
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: AppointmentCard(
+                      appointment: sortedAppointments[index],
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.appointmentDetailsScreen,
+                          arguments: sortedAppointments[index],
+                        );
+                      },
+                      onCancelTap: (appointmentId) {
+                        _showCancellationDialog(appointmentId);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        )
+        : _buildEmptyAppointments();
   }
 
   Widget _buildTopDoctorsSection() {
@@ -381,13 +380,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: TopPickCard(
                             doctor: pickedDoctor,
                             onTap: () {
-                              final Map<String, dynamic> args = {
-                                "pickedDoctor": pickedDoctor,
-                              };
+                              // Just navigate to the appointment booking screen
                               Navigator.pushNamed(
                                 context,
                                 Routes.appointmentBookingScreen,
-                                arguments: args,
                               );
                             },
                           ),
@@ -417,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SizedBox(height: 12),
           SizedBox(
-            height: 180,
+            height: MediaQuery.sizeOf(context).height * 0.25,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -467,6 +463,345 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.grey.shade500,
               ),
               textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Add cancellation dialog
+  Future<void> _showCancellationDialog(String appointmentId) async {
+    final TextEditingController reasonController = TextEditingController();
+    bool isSubmitting = false;
+    String? errorMessage;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10.0,
+                      offset: Offset(0.0, 10.0),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.cancel_outlined, color: Colors.red),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'Cancel Appointment',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Please provide a reason for cancellation:',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: reasonController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Enter reason',
+                        hintStyle: GoogleFonts.poppins(
+                          color: Colors.grey.shade400,
+                          fontSize: 14,
+                        ),
+                        errorText: errorMessage,
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.teal),
+                        ),
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isSubmitting
+                                  ? null
+                                  : () {
+                                    Navigator.of(context).pop();
+                                  },
+                          child: Text(
+                            'Cancel',
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed:
+                              isSubmitting
+                                  ? null
+                                  : () async {
+                                    if (reasonController.text.trim().isEmpty) {
+                                      setState(() {
+                                        errorMessage =
+                                            'Please enter a valid reason';
+                                      });
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isSubmitting = true;
+                                      errorMessage = null;
+                                    });
+
+                                    try {
+                                      final result =
+                                          await AppointmentRepository()
+                                              .cancelAppointment(
+                                                appointmentId: appointmentId,
+                                                reason:
+                                                    reasonController.text
+                                                        .trim(),
+                                                cancelledBy: 'patient',
+                                              );
+
+                                      if (result['success']) {
+                                        Navigator.of(context).pop(result);
+                                      } else {
+                                        print("result: $result");
+                                        setState(() {
+                                          isSubmitting = false;
+                                          errorMessage =
+                                              result['message'] ??
+                                              'Failed to cancel appointment';
+                                        });
+                                      }
+                                    } catch (er, st) {
+                                      print("error: $er");
+                                      print("stack trace: $st");
+                                      setState(() {
+                                        isSubmitting = false;
+                                        errorMessage =
+                                            'Failed to cancel appointment: $er';
+                                      });
+                                    }
+                                  },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child:
+                              isSubmitting
+                                  ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Text(
+                                    'Submit',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((result) {
+      if (result != null && result['success'] == true) {
+        // Update the local list immediately after dialog closes
+        _updateLocalAppointmentStatus(appointmentId, 'cancelled');
+
+        // Show success snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Appointment cancelled successfully',
+                    style: GoogleFonts.poppins(),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    });
+  }
+
+  // Helper method to update appointment status locally
+  void _updateLocalAppointmentStatus(String appointmentId, String newStatus) {
+    if (mounted) {
+      setState(() {
+        // Find the appointment in the singleton and update its status
+        final index = Appointments().patientAppointmentsList.indexWhere(
+          (appointment) => appointment.id == appointmentId,
+        );
+
+        if (index != -1) {
+          // Create a new appointment with updated status
+          final oldAppointment = Appointments().patientAppointmentsList[index];
+
+          // Make sure all values are properly handled as non-null strings
+          final updatedAppointment = AppointmentModel(
+            id: oldAppointment.id,
+            patientId: oldAppointment.patientId,
+            doctorId: oldAppointment.doctorId,
+            date: oldAppointment.date,
+            time: oldAppointment.time,
+            reason: oldAppointment.reason,
+            status: newStatus,
+            createdAt: oldAppointment.createdAt,
+          );
+
+          // Replace the old appointment with the updated one
+          Appointments().patientAppointmentsList[index] = updatedAppointment;
+        }
+      });
+    }
+  }
+
+  // Add missing loading appointments method
+  Widget _buildLoadingAppointments() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      height: 200,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CupertinoActivityIndicator(color: Colors.teal),
+            SizedBox(height: 16),
+            Text(
+              "Loading your appointments...",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Add missing empty appointments method
+  Widget _buildEmptyAppointments() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(PhosphorIcons.calendar(), size: 60, color: Colors.grey.shade300),
+          SizedBox(height: 16),
+          Text(
+            "No appointments scheduled",
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8),
+          Text(
+            "Book an appointment with a doctor to get started",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, Routes.appointmentBookingScreen);
+            },
+            icon: Icon(PhosphorIcons.plus(), color: Colors.white),
+            label: Text("Book Appointment"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],

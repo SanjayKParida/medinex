@@ -17,10 +17,9 @@ export const registerPatient = async (event, context) => {
       height,
       bloodGroup,
       gender,
-      doctorID,
+      doctorId,
       medicalConditions,
       phoneNumber,
-      symptoms,
       address,
       pastSurgeries,
       currentMedications,
@@ -44,7 +43,9 @@ export const registerPatient = async (event, context) => {
     }
 
     // ✅ Generate human-readable unique patient ID
-    const patientId = `PAT-${Date.now().toString().slice(-6)}${Math.floor(10 + Math.random() * 90)}`;
+    const patientId = `PAT-${Date.now().toString().slice(-6)}${Math.floor(
+      10 + Math.random() * 90
+    )}`;
 
     const userData = {
       patientId,
@@ -55,7 +56,7 @@ export const registerPatient = async (event, context) => {
       ...(bloodGroup && { bloodGroup }),
       ...(phoneNumber && { phoneNumber }),
       ...(gender && { gender }),
-      ...(doctorID && { doctorID }),
+      ...(doctorId && { doctorId }),
       ...(medicalConditions && { medicalConditions }),
       ...(symptoms && { symptoms }),
       ...(address && { address }),

@@ -28,6 +28,9 @@ class SharedPreferencesService {
     String userType,
     Map<String, dynamic> userDetails,
   ) async {
+    print('📦 Saving to SharedPreferences:');
+    print('➡️ userType: $userType');
+    print('➡️ userData: $userDetails');
     await prefs.setString("userData", jsonEncode(userDetails));
     await prefs.setString("userType", userType);
   }
@@ -36,6 +39,9 @@ class SharedPreferencesService {
 
   Map<String, dynamic>? getUserDetails() {
     final userData = prefs.getString('userData');
+    print('📦 Stored SharedPreferences:');
+    print('➡️ userType: ${userType}');
+    print('➡️ userData: $userData');
     if (userData != null) {
       return jsonDecode(userData);
     }
@@ -49,5 +55,4 @@ class SharedPreferencesService {
   Future<void> logout() async {
     await prefs.clear();
   }
-
 }

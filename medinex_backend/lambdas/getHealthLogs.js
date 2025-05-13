@@ -4,88 +4,91 @@ export const handler = async (event) => {
   let mongoClient = null;
 
   try {
-    // Get MongoDB client with proper error handling
+    console.log(
+      "getHealthLogs lambda invoked with event:",
+      JSON.stringify(event)
+    );
+
     try {
       mongoClient = await getMongoClient();
 
-      // Verify the connection is active
       if (!mongoClient) {
         throw new Error("Failed to get MongoDB client");
       }
 
-      // Test the connection with a ping command
       await mongoClient.db("admin").command({ ping: 1 });
-      console.log("MongoDB connection verified for getDoctorPatients");
+      console.log("MongoDB connection verified for getHealthLogs");
     } catch (dbError) {
       console.error("MongoDB connection failed:", dbError);
       return {
         statusCode: 500,
-        body: {
+        body: JSON.stringify({
           response: false,
           message: "Database connection error",
           error: dbError.message,
-        },
+        }),
       };
     }
 
-    const { doctorId } = event;
+    const { patientId } = event;
 
-    // Validate doctorId
-    if (!doctorId) {
+    if (!patientId) {
+      console.error("No patientId provided in the request");
       return {
         statusCode: 400,
-        body: {
+        body: JSON.stringify({
           response: false,
-          message: "Doctor ID is required",
-        },
+          message: "Patient ID is required",
+        }),
       };
     }
 
-    // Find all patients with this doctorId
-    const patients = await mongoClient
+    console.log(`Fetching health logs for patient: ${patientId}`);
+
+    //Find all health logs for the patient
+    const healthLogs = await mongoClient
       .db("medenix")
-      .collection("patients")
-      .find({ doctorId: doctorId })
+      .collection("healthLogs")
+      .find({ patientId: patientId })
       .toArray();
 
-    // Check if patients were found
-    if (patients.length === 0) {
+    console.log(
+      `Found ${healthLogs.length} health logs for patient ${patientId}`
+    );
+
+    //Check if any health logs were found
+    if (healthLogs.length === 0) {
       return {
         statusCode: 200,
-        body: {
+        body: JSON.stringify({
           response: true,
-          message: "No patients found for this doctor",
-          data: [],
-        },
+          message: "No health logs found for this patient",
+          healthLogs: [],
+        }),
       };
     }
 
-    // Return successful response with patient data
+    //Return the health logs
     return {
       statusCode: 200,
-      body: {
+      body: JSON.stringify({
         response: true,
-        message: "Patients retrieved successfully",
-        data: patients,
-      },
+        message: "Health logs retrieved successfully",
+        healthLogs: healthLogs,
+      }),
     };
   } catch (error) {
-    console.error("Error fetching doctor's patients:", error);
+    console.error("Error fetching health logs:", error);
 
     return {
       statusCode: 500,
-      body: {
+      body: JSON.stringify({
         response: false,
-        message: "Error retrieving patients",
+        message: "Error retrieving health logs",
         error: error.message,
-      },
+      }),
     };
   } finally {
-    // Don't close the MongoDB connection in Lambda functions
-    // AWS Lambda reuses the container, so we want to keep the connection alive
-    // for future invocations to benefit from connection reuse
-
-    // Only close if there was an error establishing the connection
     if (mongoClient && mongoClient._errorConnection) {
       try {
         await mongoClient.close();

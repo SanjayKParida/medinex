@@ -4,13 +4,16 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.787.0",
     "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.1",
+    "serverless-dotenv-plugin": "^6.0.0",
     "serverless-http": "^3.2.0"
   }
 }

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/routes.dart';
 import 'package:medinix_frontend/repositories/doctor_repository.dart';
 import 'package:medinix_frontend/repositories/patient_repository.dart';
+import 'package:medinix_frontend/utilities/patient_data_service.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -72,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
         print("result:::: $result");
 
         final statusCode = result['statusCode'];
-        final body = result['body'];
+        final body = result['body']['body'];
 
         if (statusCode == 200 &&
             body['response'] == true &&
@@ -80,6 +81,10 @@ class _SplashScreenState extends State<SplashScreen> {
           final latestPatientData = body['patientData'];
           print("latest patient data : $latestPatientData");
           await prefs.saveUserData("patient", latestPatientData);
+
+          // PatientDataService is already initialized in main.dart
+          final patientDataService = PatientDataService.getInstance();
+          patientDataService.refreshPatientData();
         }
       }
 

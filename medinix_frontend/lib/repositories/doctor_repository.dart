@@ -78,10 +78,7 @@ class DoctorRepo {
     try {
       final response = await http.post(
         url,
-        body: jsonEncode({
-          "doctorId": doctorLoginId,
-          "password": password,
-        }),
+        body: jsonEncode({"doctorId": doctorLoginId, "password": password}),
         headers: {"Content-Type": "application/json"},
       );
 
@@ -186,6 +183,100 @@ class DoctorRepo {
       final errorMsg = "An error occurred: $e";
       DoctorPatients().errorMessage = errorMsg;
       return {'success': false, 'message': errorMsg};
+    }
+  }
+
+  // Get a specific patient by ID
+  Future<Map<String, dynamic>> getPatientById(String patientId) async {
+    try {
+      // Check if patients are already loaded in the singleton
+      if (DoctorPatients().patientsLoaded) {
+        // Try to find patient in existing data first
+        final patient = DoctorPatients().patientsList.firstWhere(
+          (patient) => patient['patientId'] == patientId,
+          orElse: () => <String, dynamic>{},
+        );
+
+        if (patient.isNotEmpty) {
+          return {'success': true, 'data': patient};
+        }
+      }
+
+      // If not found in cache or cache not loaded, fetch all patients
+      final result = await getDoctorPatients();
+
+      if (result['success'] == true) {
+        // Try to find patient in newly fetched data
+        final patient = DoctorPatients().patientsList.firstWhere(
+          (patient) => patient['patientId'] == patientId,
+          orElse: () => <String, dynamic>{},
+        );
+
+        if (patient.isNotEmpty) {
+          return {'success': true, 'data': patient};
+        } else {
+          return {'success': false, 'message': 'Patient not found'};
+        }
+      } else {
+        return result; // Pass through the error from getDoctorPatients
+      }
+    } catch (e) {
+      final errorMsg = "Error fetching patient: $e";
+      return {'success': false, 'message': errorMsg};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateDoctorDetails({
+    required String doctorId,
+    required String patientId,
+    required String action,
+  }) async {
+    try {
+      print("➡️ Updating doctor details - Action: $action");
+      final response = await http.post(
+        Uri.parse('$baseUrl/update-doctor-details'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'doctorId': doctorId,
+          'patientId': patientId,
+          'action': action,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+      print("➡️ Doctor update response: $responseData");
+
+      if (response.statusCode == 200) {
+        // Get latest doctor data to verify the update
+        final doctorDetails = await getDoctorDetails(doctorId);
+        print("➡️ Latest doctor data: ${doctorDetails['body']}");
+
+        return {
+          'statusCode': response.statusCode,
+          'success': true,
+          'body': responseData,
+          'message':
+              action == "remove"
+                  ? 'Patient removed from doctor\'s patient list successfully'
+                  : 'Patient added to doctor\'s patient list successfully',
+        };
+      } else {
+        return {
+          'statusCode': response.statusCode,
+          'success': false,
+          'body': {
+            'message':
+                responseData['message'] ?? 'Failed to update doctor details',
+          },
+        };
+      }
+    } catch (e) {
+      print("➡️ Error updating doctor details: $e");
+      return {
+        'statusCode': 500,
+        'success': false,
+        'body': {'message': 'Error updating doctor details: $e'},
+      };
     }
   }
 }

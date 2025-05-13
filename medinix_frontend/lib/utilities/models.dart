@@ -19,7 +19,7 @@ class PatientDetails {
   int height = 0;
   String bloodGroup = "";
   String gender = "";
-  String doctorID = "";
+  String doctorId = ""; // This will store the linked doctor's ID
   String medicalCondition = "";
   String phoneNumber = "";
   String symptoms = "";

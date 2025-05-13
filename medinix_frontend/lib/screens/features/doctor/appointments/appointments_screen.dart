@@ -610,7 +610,8 @@ class AppointmentCard extends StatelessWidget {
                       statusText.toLowerCase() == 'scheduled')
                     OutlinedButton.icon(
                       onPressed: () {
-                        // Cancel appointment logic
+                        // Show cancellation dialog
+                        _showCancellationDialog(context, appointment);
                       },
                       icon: Icon(Icons.close, size: 16),
                       label: Text('Cancel'),
@@ -663,5 +664,138 @@ class AppointmentCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Create a method to show cancellation dialog
+  void _showCancellationDialog(
+    BuildContext context,
+    Map<String, dynamic> appointment,
+  ) {
+    final TextEditingController reasonController = TextEditingController();
+    final AppointmentRepository appointmentRepo = AppointmentRepository();
+    bool isSubmitting = false;
+    String? errorMessage;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(
+                'Cancel Appointment',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Please provide a reason for cancellation:',
+                    style: GoogleFonts.poppins(fontSize: 14),
+                  ),
+                  SizedBox(height: 12),
+                  TextField(
+                    controller: reasonController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      hintText: 'Enter reason',
+                      errorText: errorMessage,
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed:
+                      isSubmitting
+                          ? null
+                          : () {
+                            Navigator.of(dialogContext).pop();
+                          },
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      isSubmitting
+                          ? null
+                          : () async {
+                            if (reasonController.text.trim().isEmpty) {
+                              setState(() {
+                                errorMessage = 'Please enter a valid reason';
+                              });
+                              return;
+                            }
+
+                            setState(() {
+                              isSubmitting = true;
+                              errorMessage = null;
+                            });
+
+                            try {
+                              final result = await appointmentRepo
+                                  .cancelAppointment(
+                                    appointmentId: appointment['_id'],
+                                    reason: reasonController.text.trim(),
+                                    cancelledBy: 'doctor',
+                                  );
+
+                              Navigator.of(dialogContext).pop(result);
+                            } catch (e) {
+                              setState(() {
+                                isSubmitting = false;
+                                errorMessage =
+                                    'Failed to cancel appointment: $e';
+                              });
+                            }
+                          },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                  child:
+                      isSubmitting
+                          ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((result) {
+      if (result != null && result['success'] == true) {
+        // Show success snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Appointment cancelled successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Refresh appointments in parent screen
+        final _AppointmentsScreenState? parentState =
+            context.findAncestorStateOfType<_AppointmentsScreenState>();
+        if (parentState != null) {
+          parentState._refreshAppointments();
+        }
+      }
+    });
   }
 }

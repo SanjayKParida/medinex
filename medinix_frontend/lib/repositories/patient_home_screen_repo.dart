@@ -21,11 +21,18 @@ class PatientHomeScreenRepo {
       if (response.statusCode == 200 && data['body']['response'] == true) {
         print("patient appoinments :: ${data['body']['appointments']}");
 
+        // Clear the existing list before adding new appointments
+        Appointments().patientAppointmentsList.clear();
+
         for (var json in data['body']['appointments']) {
           Appointments().patientAppointmentsList.add(
             AppointmentModel.fromJson(json),
           );
         }
+
+        // Mark appointments as loaded after successful fetch
+        Appointments().appointmentsLoaded = true;
+
         print(
           "Patient Appointments from the API ${Appointments().patientAppointmentsList}",
         );

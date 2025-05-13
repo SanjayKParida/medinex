@@ -8,6 +8,7 @@ import 'package:medinix_frontend/screens/features/doctor/doctor_dashboard.dart';
 import 'package:medinix_frontend/screens/features/doctor/patients/create_appointment_screen.dart';
 import 'package:medinix_frontend/screens/features/doctor/patients/patient_details_screen.dart';
 import 'package:medinix_frontend/screens/features/patient/home/appointment_booking_screen.dart';
+import 'package:medinix_frontend/screens/features/patient/insights/health_logs_screen.dart';
 import 'package:medinix_frontend/screens/features/patient/patient_dashboard.dart';
 import 'package:medinix_frontend/screens/helper_screens/doctor_detail_screen.dart';
 import 'package:medinix_frontend/screens/helper_screens/doctor_pending_approval_screen.dart';
@@ -32,6 +33,7 @@ class Routes {
       "/doctorPendingApprovalScreen";
   static const String patientDetailsScreen = "/patientDetailsScreen";
   static const String appointmentDetailsScreen = "/appointmentDetailsScreen";
+  static const String healthLogsScreen = "/healthLogsScreen";
 
   static Map<String, Widget Function(BuildContext)> routesMap = {
     splashScreen: (context) => SplashScreen(),
@@ -41,6 +43,7 @@ class Routes {
     patientDashboard: (context) => PatientDashboard(),
     doctorDetailScreen: (context) => DoctorDetailScreen(),
     loginScreen: (context) => LoginScreen(),
+    healthLogsScreen: (context) => HealthLogsScreen(),
 
     createAppointmentScreen: (context) {
       final args =

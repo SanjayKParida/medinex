@@ -36,16 +36,19 @@ class HealthTipCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (healthTip.imagePath != null)
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              child: SvgPicture.asset(
-                healthTip.imagePath!,
-                height: 100,
-                width: double.infinity,
-                fit: BoxFit.cover,
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0, top: 8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: SvgPicture.asset(
+                  healthTip.imagePath!,
+                  height: 70,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           Padding(
@@ -57,21 +60,21 @@ class HealthTipCard extends StatelessWidget {
                   healthTip.title,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 17,
                     color: primaryColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   healthTip.summary,
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: Colors.grey.shade700,
                     height: 1.4,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

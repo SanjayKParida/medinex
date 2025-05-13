@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:medinix_frontend/constants/routes.dart';
 import 'package:medinix_frontend/repositories/appointment_repository.dart';
+import 'package:medinix_frontend/repositories/doctor_repository.dart';
+import 'package:medinix_frontend/repositories/patient_repository.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 
 class PatientDetailsScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen>
   final AppointmentRepository _appointmentRepo = AppointmentRepository();
   final SharedPreferencesService _prefsService =
       SharedPreferencesService.getInstance();
+  final DoctorRepo _doctorRepo = DoctorRepo();
+  final PatientRepo _patientRepo = PatientRepo();
 
   bool _isLoadingAppointments = true;
   List<dynamic> _appointments = [];
@@ -128,6 +132,76 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen>
           unselectedLabelColor: Colors.white70,
           tabs: tabs,
         ),
+        actions: [
+          if (_isPatientLinkedToDoctor)
+            IconButton(
+              icon: Icon(Icons.remove_circle, color: Colors.red),
+              tooltip: 'Remove Patient',
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: Text('Remove Patient'),
+                        content: Text(
+                          'Are you sure you want to remove this patient from your list?',
+                        ),
+                        actions: [
+                          TextButton(
+                            child: Text('Cancel'),
+                            onPressed: () => Navigator.of(context).pop(false),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: Text(
+                              'Remove',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(true),
+                          ),
+                        ],
+                      ),
+                );
+                if (confirm == true) {
+                  // Remove doctorId from patient
+                  final patientResult = await _patientRepo.updatePatientDetails(
+                    patientId: widget.patient['patientId'],
+                    doctorId: '',
+                    action: 'remove',
+                  );
+                  print("patientResult: $patientResult");
+                  // Remove patientId from doctor's patients list
+                  final doctorResult = await _doctorRepo.updateDoctorDetails(
+                    doctorId: _currentDoctorId ?? '',
+                    patientId: '',
+                    action: 'remove',
+                  );
+                  print("doctorResult: $doctorResult");
+                  if (patientResult['success'] == true &&
+                      doctorResult['success'] == true) {
+                    setState(() {
+                      _isPatientLinkedToDoctor = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Patient removed successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to remove patient.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+        ],
       ),
       body: TabBarView(controller: _tabController, children: tabViews),
       floatingActionButton:

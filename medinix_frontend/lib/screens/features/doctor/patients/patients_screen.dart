@@ -17,6 +17,7 @@ class PatientsScreen extends StatefulWidget {
 class _PatientsScreenState extends State<PatientsScreen> {
   final DoctorRepo _doctorRepo = DoctorRepo();
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -25,18 +26,37 @@ class _PatientsScreenState extends State<PatientsScreen> {
   }
 
   Future<void> _fetchPatients() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Only fetch if data isn't already loaded
-    if (!DoctorPatients().patientsLoaded) {
-      await _doctorRepo.getDoctorPatients();
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
     }
 
-    setState(() {
-      _isLoading = false;
-    });
+    // Reset the singleton data
+    DoctorPatients().patientsLoaded = false;
+    DoctorPatients().errorMessage = null;
+    DoctorPatients().patientsList = [];
+
+    try {
+      await _doctorRepo.getDoctorPatients();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to fetch patients: $e';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Add a method to handle patient acceptance
+  Future<void> handlePatientAccepted() async {
+    await _fetchPatients();
   }
 
   @override
@@ -301,26 +321,20 @@ class PatientCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildInfoRow(
-          icon: Icons.cake_outlined,
-          label: 'DOB',
-          value: patient['dob'] ?? 'Not specified',
-        ),
-        _buildInfoRow(
-          icon: Icons.person_outline,
-          label: 'Gender',
-          value: patient['gender'] ?? 'Not specified',
+          icon: Icons.bloodtype_outlined,
+          label: 'Blood Group',
+          value: patient['bloodGroup'] ?? 'Not specified',
         ),
         _buildInfoRow(
           icon: Icons.phone_outlined,
           label: 'Phone',
           value: patient['phoneNumber'] ?? 'Not specified',
         ),
-        if (patient['address'] != null)
-          _buildInfoRow(
-            icon: Icons.location_on_outlined,
-            label: 'Address',
-            value: patient['address'],
-          ),
+        _buildInfoRow(
+          icon: Icons.person_outline,
+          label: 'Gender',
+          value: patient['gender'] ?? 'Not specified',
+        ),
       ],
     );
   }

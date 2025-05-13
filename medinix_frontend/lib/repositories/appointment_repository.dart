@@ -113,4 +113,42 @@ class AppointmentRepository {
       return {'success': false, 'message': 'An error occurred: $e'};
     }
   }
+
+  Future<Map<String, dynamic>> cancelAppointment({
+    required String appointmentId,
+    required String reason,
+    required String cancelledBy,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/cancel-appointment');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'appointmentId': appointmentId,
+          'reason': reason,
+          'cancelledBy': cancelledBy,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': data['body'] ?? data,
+          'message':
+              data['body']?['message'] ?? 'Appointment cancelled successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['body']?['message'] ?? 'Failed to cancel appointment',
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'An error occurred: $e'};
+    }
+  }
 }

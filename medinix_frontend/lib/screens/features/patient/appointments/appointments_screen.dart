@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:medinix_frontend/repositories/appointment_repository.dart';
 import 'package:medinix_frontend/repositories/patient_home_screen_repo.dart';
 import 'package:medinix_frontend/utilities/models.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
@@ -16,10 +17,12 @@ class AppointmentsScreen extends StatefulWidget {
 
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
   final PatientHomeScreenRepo _repo = PatientHomeScreenRepo();
+  final AppointmentRepository _appointmentRepo = AppointmentRepository();
   bool _isLoading = false;
   String? _errorMessage;
   List<String> filters = ['All', 'Upcoming', 'Completed', 'Cancelled'];
   String selectedFilter = 'All';
+  String? _patientId;
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     try {
       final userData = SharedPreferencesService.getInstance().getUserDetails();
       final patientId = userData?['patientId'];
+      _patientId = patientId;
 
       if (patientId == null) {
         setState(() {
@@ -47,15 +51,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         return;
       }
 
-      // Clear existing appointments before fetching new ones
+      // Reset the singleton data
       Appointments().patientAppointmentsList.clear();
+      Appointments().appointmentsLoaded = false;
 
       final response = await _repo.getPatientAppointments(patientId);
 
       if (mounted) {
         setState(() {
           _isLoading = false;
-          if (response['success'] != true) {
+          if (response['success'] == true) {
+            Appointments().appointmentsLoaded = true;
+          } else {
             _errorMessage =
                 response['message'] ?? 'Failed to load appointments';
           }
@@ -68,6 +75,270 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           _errorMessage = 'An error occurred: $e';
         });
       }
+    }
+  }
+
+  Future<void> _showCancellationDialog(String appointmentId) async {
+    final TextEditingController reasonController = TextEditingController();
+    bool isSubmitting = false;
+    String? errorMessage;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10.0,
+                      offset: Offset(0.0, 10.0),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.cancel_outlined, color: Colors.red),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'Cancel Appointment',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Please provide a reason for cancellation:',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: reasonController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Enter reason',
+                        hintStyle: GoogleFonts.poppins(
+                          color: Colors.grey.shade400,
+                          fontSize: 14,
+                        ),
+                        errorText: errorMessage,
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.teal),
+                        ),
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed:
+                              isSubmitting
+                                  ? null
+                                  : () {
+                                    Navigator.of(context).pop();
+                                  },
+                          child: Text(
+                            'Cancel',
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed:
+                              isSubmitting
+                                  ? null
+                                  : () async {
+                                    if (reasonController.text.trim().isEmpty) {
+                                      setState(() {
+                                        errorMessage =
+                                            'Please enter a valid reason';
+                                      });
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isSubmitting = true;
+                                      errorMessage = null;
+                                    });
+
+                                    try {
+                                      final result = await _appointmentRepo
+                                          .cancelAppointment(
+                                            appointmentId: appointmentId,
+                                            reason:
+                                                reasonController.text.trim(),
+                                            cancelledBy: 'patient',
+                                          );
+
+                                      if (result['success']) {
+                                        // Update the appointment status in the local list immediately
+                                        Navigator.of(context).pop(result);
+                                      } else {
+                                        setState(() {
+                                          print("result: $result");
+                                          isSubmitting = false;
+                                          errorMessage =
+                                              result['message'] ??
+                                              'Failed to cancel appointment';
+                                        });
+                                      }
+                                    } catch (er, st) {
+                                      print("error: $er");
+                                      print("stack trace: $st");
+                                      setState(() {
+                                        isSubmitting = false;
+                                        errorMessage =
+                                            'Failed to cancel appointment: $er';
+                                      });
+                                    }
+                                  },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child:
+                              isSubmitting
+                                  ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Text(
+                                    'Submit',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((result) {
+      if (result != null && result['success'] == true) {
+        // Update the local list immediately after dialog closes
+        _updateLocalAppointmentStatus(appointmentId, 'cancelled');
+
+        // Show success snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Appointment cancelled successfully',
+                    style: GoogleFonts.poppins(),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    });
+  }
+
+  void _updateLocalAppointmentStatus(String appointmentId, String newStatus) {
+    if (mounted) {
+      setState(() {
+        // Find the appointment in the singleton and update its status
+        final index = Appointments().patientAppointmentsList.indexWhere(
+          (appointment) => appointment.id == appointmentId,
+        );
+
+        if (index != -1) {
+          // Create a new appointment with updated status
+          final oldAppointment = Appointments().patientAppointmentsList[index];
+
+          // Make sure all values are properly handled as non-null strings
+          final updatedAppointment = AppointmentModel(
+            id: oldAppointment.id,
+            patientId: oldAppointment.patientId,
+            doctorId: oldAppointment.doctorId,
+            date: oldAppointment.date,
+            time: oldAppointment.time,
+            reason: oldAppointment.reason,
+            status: newStatus,
+            createdAt: oldAppointment.createdAt,
+          );
+
+          // Replace the old appointment with the updated one
+          Appointments().patientAppointmentsList[index] = updatedAppointment;
+        }
+      });
     }
   }
 
@@ -127,13 +398,27 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'My Appointments',
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade800,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'My Appointments',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              IconButton(
+                onPressed: _fetchAppointments,
+                icon: Icon(
+                  PhosphorIcons.arrowClockwise(),
+                  color: Colors.teal,
+                  size: 24,
+                ),
+                tooltip: 'Refresh appointments',
+              ),
+            ],
           ),
           SizedBox(height: 4),
           Text(
@@ -556,7 +841,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            // TODO: Implement cancel
+                            _showCancellationDialog(appointment.id);
                           },
                           icon: Icon(PhosphorIcons.x()),
                           label: Text('Cancel'),

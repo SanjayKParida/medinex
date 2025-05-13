@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medinix_frontend/constants/routes.dart';
+import 'package:medinix_frontend/utilities/doctor_data_service.dart';
 import 'package:medinix_frontend/utilities/shared_preferences_service.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -13,8 +14,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Map<String, dynamic>? _doctorInfo;
+  final _doctorService = DoctorDataService.getInstance();
   final _prefsService = SharedPreferencesService.getInstance();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -22,8 +24,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadDoctorInfo();
   }
 
-  void _loadDoctorInfo() {
-    _doctorInfo = _prefsService.getUserDetails();
+  Future<void> _loadDoctorInfo() async {
+    try {
+      debugPrint('PROFILE: Initializing DoctorDataService');
+      await _doctorService.init();
+
+      // Attempt to refresh doctor data for the latest information
+      debugPrint('PROFILE: Refreshing doctor data');
+      // Add a refreshDoctorData method call here if available
+
+      debugPrint('PROFILE: Doctor data loaded successfully');
+    } catch (e) {
+      debugPrint('PROFILE: Error loading doctor data: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -63,12 +82,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final doctorName = _doctorInfo?['name'] ?? 'Doctor';
-    final email = _doctorInfo?['email'] ?? 'Not available';
-    final phoneNumber = _doctorInfo?['phoneNumber'] ?? 'Not available';
-    final specialization =
-        _doctorInfo?['specialization'] ?? 'General Physician';
-    final doctorId = _doctorInfo?['doctorId'] ?? 'Not available';
+    // Use DoctorDataService getters
+    final doctorName = _doctorService.name;
+    final email = _doctorService.email;
+    final phoneNumber = _doctorService.mobileNumber;
+    final specialization = _doctorService.specialization;
+    final doctorId = _doctorService.doctorId;
 
     // Set status bar to match app theme
     SystemChrome.setSystemUIOverlayStyle(
@@ -83,88 +102,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         top: false, // Allow content to extend behind status bar
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with profile image and basic info
-              _buildProfileHeader(doctorName, specialization),
+        child:
+            _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header with profile image and basic info
+                      _buildProfileHeader(doctorName, specialization),
 
-              SizedBox(height: 20),
+                      SizedBox(height: 20),
 
-              // Information sections
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle('Personal Information'),
-                    _buildInfoCard([
-                      _buildInfoItem(
-                        PhosphorIcons.identificationCard(),
-                        'Doctor ID',
-                        doctorId,
-                      ),
-                      _buildInfoItem(PhosphorIcons.envelope(), 'Email', email),
-                      _buildInfoItem(
-                        PhosphorIcons.phone(),
-                        'Phone',
-                        phoneNumber,
-                      ),
-                      _buildInfoItem(
-                        PhosphorIcons.stethoscope(),
-                        'Specialization',
-                        specialization,
-                      ),
-                    ]),
+                      // Information sections
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle('Personal Information'),
+                            _buildInfoCard([
+                              _buildInfoItem(
+                                PhosphorIcons.identificationCard(),
+                                'Doctor ID',
+                                doctorId,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.envelope(),
+                                'Email',
+                                email,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.phone(),
+                                'Phone',
+                                phoneNumber,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.stethoscope(),
+                                'Specialization',
+                                specialization,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.buildings(),
+                                'Clinic Name',
+                                _doctorService.clinicName,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.mapPin(),
+                                'Work Address',
+                                _doctorService.workAddress,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.certificate(),
+                                'Medical Registration',
+                                _doctorService.medicalRegistrationNumber,
+                              ),
+                              _buildInfoItem(
+                                PhosphorIcons.clockCounterClockwise(),
+                                'Years of Experience',
+                                _doctorService.yearsOfExperience,
+                              ),
+                            ]),
 
-                    SizedBox(height: 20),
+                            SizedBox(height: 20),
 
-                    _buildSectionTitle('Account'),
-                    _buildActionCard([
-                      _buildActionItem(
-                        PhosphorIcons.gear(),
-                        'Settings',
-                        'App preferences and notifications',
-                        () {
-                          // Navigate to settings
-                        },
-                      ),
-                      _buildActionItem(
-                        PhosphorIcons.shieldStar(),
-                        'Privacy',
-                        'Manage your data and privacy',
-                        () {
-                          // Navigate to privacy settings
-                        },
-                      ),
-                      _buildActionItem(
-                        PhosphorIcons.signOut(),
-                        'Logout',
-                        'Sign out from your account',
-                        () => _logout(context),
-                        isDestructive: true,
-                      ),
-                    ]),
+                            _buildSectionTitle('Account'),
+                            _buildActionCard([
+                              _buildActionItem(
+                                PhosphorIcons.gear(),
+                                'Settings',
+                                'App preferences and notifications',
+                                () {
+                                  // Navigate to settings
+                                },
+                              ),
+                              _buildActionItem(
+                                PhosphorIcons.shieldStar(),
+                                'Privacy',
+                                'Manage your data and privacy',
+                                () {
+                                  // Navigate to privacy settings
+                                },
+                              ),
+                              _buildActionItem(
+                                PhosphorIcons.signOut(),
+                                'Logout',
+                                'Sign out from your account',
+                                () => _logout(context),
+                                isDestructive: true,
+                              ),
+                            ]),
 
-                    SizedBox(height: 32),
+                            SizedBox(height: 32),
 
-                    Center(
-                      child: Text(
-                        'Medinix v1.0.0',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey.shade500,
+                            Center(
+                              child: Text(
+                                'Medinix v1.0.0',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                          ],
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

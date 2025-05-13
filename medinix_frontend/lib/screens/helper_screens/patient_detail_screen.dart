@@ -32,12 +32,6 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
       TextEditingController();
   final TextEditingController _emergencyRelationController =
       TextEditingController();
-  final TextEditingController _symptomFrequencyController =
-      TextEditingController();
-  final TextEditingController _symptomDescriptionController =
-      TextEditingController();
-  final TextEditingController _symptomSeverityController =
-      TextEditingController();
 
   String? _selectedBloodGroup;
   String? _selectedGender;
@@ -94,12 +88,6 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
           'relation': _emergencyRelationController.text,
         };
 
-        final symptomsDetails = {
-          'description': _symptomDescriptionController.text,
-          'severity': _symptomSeverityController.text,
-          'frequency': _symptomFrequencyController.text,
-        };
-
         final patientData = {
           'name': _nameController.text,
           'dob': _dobController.text,
@@ -109,7 +97,6 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
           'gender': _selectedGender,
           'phoneNumber': _phoneController.text,
           'address': _addressController.text,
-          'symptoms': symptomsDetails,
           'medicalConditions': _medicalConditionsController.text,
           'pastSurgeries': _pastSurgeriesController.text,
           'currentMedications': _currentMedicationsController.text,
@@ -118,9 +105,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
 
         print("Patient data : $patientData");
 
-        await AuthRepo().handleRegisterPatient(
-          patientData,
-        ); 
+        await AuthRepo().handleRegisterPatient(patientData);
 
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -357,57 +342,6 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Symptom Description
-                TextFormField(
-                  controller: _symptomDescriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Current Symptom (if any)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    prefixIcon: Icon(PhosphorIcons.paragraph()),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                //Symptom Severity
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: 'Severity (ignore if no symptoms)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    prefixIcon: Icon(PhosphorIcons.firstAidKit()),
-                  ),
-                  value: _selectedSeverity,
-                  items:
-                      _severity.map((level) {
-                        return DropdownMenuItem(
-                          value: level,
-                          child: Text(level),
-                        );
-                      }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedSeverity = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Symptom Frequency
-                TextFormField(
-                  controller: _symptomFrequencyController,
-                  decoration: InputDecoration(
-                    labelText: 'Frequency (if any)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    prefixIcon: Icon(PhosphorIcons.faceMask()),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
                 // Medical Conditions
                 TextFormField(
                   controller: _medicalConditionsController,
@@ -535,9 +469,6 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     _heightController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
-    _symptomFrequencyController.dispose();
-    _symptomDescriptionController.dispose();
-    _symptomSeverityController.dispose();
     _medicalConditionsController.dispose();
     _pastSurgeriesController.dispose();
     _currentMedicationsController.dispose();

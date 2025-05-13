@@ -7,6 +7,24 @@ provider:
   runtime: nodejs22.x
   region: ap-south-1
   stage: dev
+  environment:
+    MONGODB_URL: ${env:MONGODB_URL, 'mongodb://localhost:27017/medenix'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "execute-api:ManageConnections"
+      Resource:
+        - "arn:aws:execute-api:${self:provider.region}:*:*/*/POST/@connections/*"
+        - "arn:aws:execute-api:${self:provider.region}:*:*/*/GET/@connections/*"
+        - "arn:aws:execute-api:${self:provider.region}:*:*/*/DELETE/@connections/*"
+    - Effect: Allow
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:Scan"
+      Resource: "*"
 
 functions:
   # HTTP API handlers
@@ -42,22 +60,30 @@ functions:
     handler: lambdas/index.getAppointmentsByDoctorIdAndDate
   getDoctorPatients:
     handler: lambdas/index.getDoctorPatients
+  logSymptoms:
+    handler: lambdas/index.logSymptoms
+  updateDoctorDetails:
+    handler: lambdas/updateDoctorDetails.handler
+  updatePatientDetails:
+    handler: lambdas/updatePatientDetails.handler
+  getHealthLogs:
+    handler: lambdas/getHealthLogs.handler
 
-  #Websocket handlers
-  wsConnect:
-    handler: lambdas/websocket/index.wsConnect
+  # WebSocket handlers
+  websocketConnect:
+    handler: lambdas/websocket/connect.handler
     events:
       - websocket:
           route: $connect
 
-  wsDisconnect:
-    handler: lambdas/websocket/index.wsDisconnect
+  websocketDisconnect:
+    handler: lambdas/websocket/disconnect.handler
     events:
       - websocket:
           route: $disconnect
 
-  wsSendMessage:
-    handler: lambdas/websocket/index.wsSendMessage
+  websocketSendMessage:
+    handler: lambdas/websocket/sendMessage.handler
     events:
       - websocket:
           route: $default
